@@ -1,0 +1,101 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;RedTeam Bootloader										                     ;
+;version 1.0														   				    	   ;
+;@author Kiaxes <kim@kiaxes.dev>									    	   ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+[BITS 16]
+[ORG 0x7C00]
+
+	mov si, message		;move welcome message into si ready to be print
+start:
+	lodsb
+
+	cmp	al, 0			; look for null byte
+	je	first
+
+	mov	ah, 0x0e		; print char to screen
+	int	10h
+
+	jmp	start
+
+first:
+	mov	ah, 0h			; get a char from keyboard
+	int	16h				; int
+	mov	ah, 0eh			; output as teletype
+	int 10h				; int
+
+	cmp	al, '1'			; compare it to the first lucky number "1"
+	je	second			; correct jump to nothing else flow down
+						; to incorrect
+
+	jne	incorrect		; incorrect will jump o incorrect
+
+incorrect:
+
+	mov	si, wrong		; move "WRONG" into si
+
+	jmp	printout		; sent the wrong into printout
+
+second:
+
+	mov	ah, 0h			; get a char from keyboard
+	int	16h				; int
+	mov	ah, 0eh			; output as teletype
+	int 10h				; int
+	
+	cmp	al, '3'			; compare it to the second lucky number "3"
+	jne	incorrect		; incorrect jump to incorrect else flow down
+	
+third:
+
+	mov	ah, 0h			; get a char from keyboard
+	int	16h				; int
+	mov	ah, 0eh			; output as teletype
+	int 10h				; int
+
+	cmp	al, '3'			; compare it to the second lucky number "3"
+	jne	incorrect		;incorrect jump to incorrect else flow down
+
+fouth:
+
+	mov	ah, 0h			; get a char from keyboard
+	int	16h				; int
+	mov	ah, 0eh			; output as teletype
+	int 10h				; int
+	
+	cmp	al, '7'			; compare it to the second lucky number "7"
+	jne	incorrect		;incorrect jump to incorrect else flow down
+
+nothing:
+
+	mov	si, correct		; move "CORRECT" into si
+
+	jmp	printout		; sent the wrong into pirntout
+
+printout:
+
+	lodsb				; move output into si
+	cmp	al, 0			; compare al to 0
+	je	done			; if =0 jump to done
+
+	mov	ah, 0x0e		; print char
+	int	10h
+
+	jmp	printout
+
+done:
+
+
+
+
+message	 	db 10,"Guess my favorite number. It's four digits if that's any help :P : ", 0
+wrong   	db 10,10,10,"                                        ",1,1," !! WRONG !! ",1,1,0
+correct		db 10,10,10,"                                       ",1,1," !! CORRECT !! ",1,1,10,"                                           ",2," ps. you're stuck tho, Thanks for wasting your time! ",2,0
+
+
+
+
+	times 510-($-$$) db 0 	; Pad out the file to the x byte with zeroes.
+
+	db 0x55, 0xAA 			; MBR boot signature.
